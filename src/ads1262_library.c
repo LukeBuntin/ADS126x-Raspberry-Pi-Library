@@ -1,74 +1,97 @@
 #include "ads1262_library.h"
 #include <wiringPi.h>
-#include <wiringPiSPI.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/spi/spidev.h>
 #include <unistd.h> // for usleep
+#include <stdio.h>
+#include <stdlib.h>
+
+#define SPI_DEVICE "/dev/spidev0.0"
+#define SPI_MODE SPI_MODE_1
+#define SPI_SPEED 1000000
+
+int spi_fd;
 
 void ads1262_Init(void)
 {
     wiringPiSetup();
-    pinMode(GPIO_DRDY, INPUT);
-    pinMode(GPIO_RESET, OUTPUT);
-    pinMode(GPIO_START, OUTPUT);
-    pinMode(ADS1220_CS_PIN, OUTPUT);
-    wiringPiSPISetup(0, 1000000); // SPI channel 0, 1MHz
+    // pinMode(GPIO_DRDY, INPUT);
+    pinMode(GPIO_DOUT_DRDY, INPUT);
+    // pinMode(GPIO_RESET, OUTPUT);
+    // pinMode(GPIO_START, OUTPUT);
+    // pinMode(ADS1220_CS_PIN, OUTPUT);
 
-    ads1262_Reset();
-    usleep(100000);
+    spi_fd = open(SPI_DEVICE, O_RDWR);
+    if (spi_fd < 0) {
+        perror("Failed to open SPI device");
+        exit(EXIT_FAILURE);
+    }
+
+    uint8_t mode = SPI_MODE;
+    uint32_t speed = SPI_SPEED;
+    if (ioctl(spi_fd, SPI_IOC_WR_MODE, &mode) < 0) {
+        perror("Failed to set SPI mode");
+        exit(EXIT_FAILURE);
+    }
+    if (ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed) < 0) {
+        perror("Failed to set SPI speed");
+        exit(EXIT_FAILURE);
+    }
+
+    usleep(350000); // Delay to power internal voltage reference
   
-    ads1262_Hard_Stop();
-    usleep(350000);
-  
-    ads1262_Reg_Write(POWER, 0x11); 		// Default (Will need to change to external voltage for higher input analog voltage)
+    ads1262_Reg_Write(POWER, 0x11);        // Default (Will need to change to external voltage for higher input analog voltage)
     usleep(10000);
-    ads1262_Reg_Write(INTERFACE, 0x05);	// Default
+    ads1262_Reg_Write(INTERFACE, 0x05);    // Default
     usleep(10000);
-    ads1262_Reg_Write(MODE0, 0x00);		// Default
+    ads1262_Reg_Write(MODE0, 0x00);        // Default
     usleep(10000);
-    ads1262_Reg_Write(MODE1, 0x80);	    // Default
+    ads1262_Reg_Write(MODE1, 0x80);        // Default
     usleep(10000);
-    ads1262_Reg_Write(MODE2, 0x0F);	    // 38400 sps
+    ads1262_Reg_Write(MODE2, 0x04);        // 20 sps (max in fir mode)
     usleep(10000);
-    ads1262_Reg_Write(INPMUX, 0x0F);	    // Positive AIN0 and Negative Float (Connect to the universal ground)
+    ads1262_Reg_Write(INPMUX, 0x0F);       // Positive AIN0 and Negative Float (Connect to the universal ground)
     usleep(10000);  
-    ads1262_Reg_Write(OFCAL0, 0x00);	    // Default
+    ads1262_Reg_Write(OFCAL0, 0x00);       // Default
     usleep(10000);  
-    ads1262_Reg_Write(OFCAL1, 0x00);	    // Default
+    ads1262_Reg_Write(OFCAL1, 0x00);       // Default
     usleep(10000);  
-    ads1262_Reg_Write(OFCAL2, 0x00);	    // Default
+    ads1262_Reg_Write(OFCAL2, 0x00);       // Default
     usleep(10000);  
-    ads1262_Reg_Write(FSCAL0, 0x00);	    //  Default
+    ads1262_Reg_Write(FSCAL0, 0x00);       // Default
     usleep(10000);  
-    ads1262_Reg_Write(FSCAL1, 0x00);	    // Default
+    ads1262_Reg_Write(FSCAL1, 0x00);       // Default
     usleep(10000);  
-    ads1262_Reg_Write(FSCAL2, 0x40);	    // Default
+    ads1262_Reg_Write(FSCAL2, 0x40);       // Default
     usleep(10000);  
-    ads1262_Reg_Write(IDACMUX, 0xBB);	    // Default
+    ads1262_Reg_Write(IDACMUX, 0xBB);      // Default
     usleep(10000);  
-    ads1262_Reg_Write(IDACMAG, 0x00);	    // Default
+    ads1262_Reg_Write(IDACMAG, 0x00);      // Default
     usleep(10000);  
-    ads1262_Reg_Write(REFMUX, 0x00);	    // Default
+    ads1262_Reg_Write(REFMUX, 0x02);       // Negative side connected to AIN3 (Connect to ground)
     usleep(10000);    
-    ads1262_Reg_Write(TDACP, 0x00);	    // Default
+    ads1262_Reg_Write(TDACP, 0x00);        // Default
     usleep(10000);    
-    ads1262_Reg_Write(TDACN, 0x00);	    // Default
+    ads1262_Reg_Write(TDACN, 0x00);        // Default
     usleep(10000);    
-    ads1262_Reg_Write(GPIOCON, 0x00);	    // Default
+    ads1262_Reg_Write(GPIOCON, 0x00);      // Default
     usleep(10000);    
-    ads1262_Reg_Write(GPIODIR, 0x00);	    // Default
+    ads1262_Reg_Write(GPIODIR, 0x00);      // Default
     usleep(10000);    
-    ads1262_Reg_Write(GPIODAT, 0x00);	    // Default
+    ads1262_Reg_Write(GPIODAT, 0x00);      // Default
     usleep(10000);    
-    ads1262_Reg_Write(ADC2CFG, 0x00);	    // Default
+    ads1262_Reg_Write(ADC2CFG, 0x00);      // Default
     usleep(10000);    
-    ads1262_Reg_Write(ADC2MUX, 0x01);	    // Default
+    ads1262_Reg_Write(ADC2MUX, 0x01);      // Default
     usleep(10000);    
-    ads1262_Reg_Write(ADC2OFC0, 0x00);	    // Default
+    ads1262_Reg_Write(ADC2OFC0, 0x00);     // Default
     usleep(10000);    
-    ads1262_Reg_Write(ADC2OFC1, 0x00);	    // Default
+    ads1262_Reg_Write(ADC2OFC1, 0x00);     // Default
     usleep(10000);    
-    ads1262_Reg_Write(ADC2FSC0, 0x00);	    // Default
+    ads1262_Reg_Write(ADC2FSC0, 0x00);     // Default
     usleep(10000);    
-    ads1262_Reg_Write(ADC2FSC1, 0x40);	    // Default
+    ads1262_Reg_Write(ADC2FSC1, 0x40);     // Default
     usleep(10000);
 }
 
@@ -124,12 +147,16 @@ void ads1262_SPI_Command_Data(uint8_t data_in)
 {
     digitalWrite(ADS1220_CS_PIN, LOW);
     usleep(2000);
-    digitalWrite(ADS1220_CS_PIN, HIGH);
-    usleep(2000);
-    digitalWrite(ADS1220_CS_PIN, LOW);
-    usleep(2000);
 
-    wiringPiSPIDataRW(0, &data_in, 1);
+    struct spi_ioc_transfer spi = {
+        .tx_buf = (unsigned long)&data_in,
+        .rx_buf = (unsigned long)&data_in,
+        .len = 1,
+        .speed_hz = SPI_SPEED,
+        .bits_per_word = 8,
+    };
+
+    ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi);
 
     usleep(2000);
     digitalWrite(ADS1220_CS_PIN, HIGH);
@@ -144,12 +171,16 @@ void ads1262_Reg_Write(uint8_t READ_WRITE_ADDRESS, uint8_t DATA)
 
     digitalWrite(ADS1220_CS_PIN, LOW);
     usleep(2000);
-    digitalWrite(ADS1220_CS_PIN, HIGH);
-    usleep(2000);
-    digitalWrite(ADS1220_CS_PIN, LOW);
-    usleep(2000);
 
-    wiringPiSPIDataRW(0, dataToSend, 3);
+    struct spi_ioc_transfer spi = {
+        .tx_buf = (unsigned long)dataToSend,
+        .rx_buf = (unsigned long)dataToSend,
+        .len = 3,
+        .speed_hz = SPI_SPEED,
+        .bits_per_word = 8,
+    };
+
+    ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi);
 
     usleep(2000);
     digitalWrite(ADS1220_CS_PIN, HIGH);
@@ -161,12 +192,15 @@ char* ads1262_Read_Data(void)
 
     digitalWrite(ADS1220_CS_PIN, LOW);
 
-    for (int i = 0; i < 6; ++i)
-    {
-        uint8_t data = CONFIG_SPI_MASTER_DUMMY;
-        wiringPiSPIDataRW(0, &data, 1);
-        SPI_Dummy_Buff[i] = data;
-    }
+    struct spi_ioc_transfer spi = {
+        .tx_buf = (unsigned long)SPI_Dummy_Buff,
+        .rx_buf = (unsigned long)SPI_Dummy_Buff,
+        .len = 6,
+        .speed_hz = SPI_SPEED,
+        .bits_per_word = 8,
+    };
+
+    ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi);
 
     digitalWrite(ADS1220_CS_PIN, HIGH);
 

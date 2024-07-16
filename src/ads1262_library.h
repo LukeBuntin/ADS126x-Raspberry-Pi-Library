@@ -1,5 +1,5 @@
-#ifndef ads1262_library_h
-#define ads1262_library_h
+#ifndef ADS1262_LIBRARY_H
+#define ADS1262_LIBRARY_H
 
 #include <stdint.h>
 
@@ -14,11 +14,12 @@
 #define RDATA   0x12
 
 // Pin declaration (WiringPi pin numbers)
-// https://pinout.xyz/
-#define GPIO_DRDY 24   // GPIO 24
-#define GPIO_RESET 23  // GPIO 23
-#define GPIO_START 25  // GPIO 25
-#define ADS1220_CS_PIN 22   // GPIO 22
+// https://github.com/WiringPi/WiringPi
+// #define GPIO_DRDY 5   // GPIO 24
+// #define GPIO_RESET 4  // GPIO 23
+// #define GPIO_START 6  // GPIO 25
+// #define ADS1220_CS_PIN 3   // GPIO 22
+#define GPIO_DOUT_DRDY 13 // GPIO 9
 
 // Register addresses
 #define POWER    0x01

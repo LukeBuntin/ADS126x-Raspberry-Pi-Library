@@ -8,9 +8,9 @@ Library for communicating with the ADS1262 and ADS1263 using a Raspberry Pi
 | Raspberry Pi Pin (BCM) | Raspberry Pi Pin Name | ADS1262 Pin Name    | Function               |
 |------------------------|-----------------------|---------------------|------------------------|
 | GND                    | Ground                | CS                  | Chip Select            |
-| 23                     | GPIO 23               | RESET               | Reset                  |
-| 24                     | GPIO 24               | DRDY                | Data Ready             |
-| 25                     | GPIO 25               | START               | Start Conversion       |
+| FLOAT                  | N/A                   | RESET               | Reset                  |
+| FLOAT                  | N/A                   | DRDY                | Data Ready             |
+| FLOAT                  | N/A                   | START               | Start Conversion       |
 | 10                     | MOSI (GPIO 10)        | DIN                 | SPI Data In            |
 | 9                      | MISO (GPIO 9)         | DOUT                | SPI Data Out           |
 | 11                     | SCLK (GPIO 11)        | SCLK                | SPI Clock              |
@@ -22,9 +22,9 @@ Library for communicating with the ADS1262 and ADS1263 using a Raspberry Pi
 ## Description
 
 1. **Chip Select (CS)**: This pin is connected to GPIO 22 on the Raspberry Pi. It is used to select the ADS1262 chip for SPI communication (Switch to a GPIO Pin if you are using multiple chips).
-2. **Reset (RESET)**: This pin is connected to GPIO 23 on the Raspberry Pi. It is used to reset the ADS1262 chip.
-3. **Data Ready (DRDY)**: This pin is connected to GPIO 24 on the Raspberry Pi. It indicates when new data is ready to be read from the ADS1262.
-4. **Start Conversion (START)**: This pin is connected to GPIO 25 on the Raspberry Pi. It is used to start the data conversion process on the ADS1262.
+2. **Reset (RESET)**: This pin is connected to float. It is unused.
+3. **Data Ready (DRDY)**: This pin is connected to float. We are using DOUT/DRDY.
+4. **Start Conversion (START)**: This pin is connected to float. We are using the SPI command.
 5. **SPI Data In (DIN)**: This pin is connected to the MOSI pin (GPIO 10) on the Raspberry Pi. It is used for sending data to the ADS1262.
 6. **SPI Data Out (DOUT)**: This pin is connected to the MISO pin (GPIO 9) on the Raspberry Pi. It is used for receiving data from the ADS1262.
 7. **SPI Clock (SCLK)**: This pin is connected to the SCLK pin (GPIO 11) on the Raspberry Pi. It is used for the SPI clock signal.
