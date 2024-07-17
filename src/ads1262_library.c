@@ -167,6 +167,7 @@ void ads1262_SPI_Command_Data(uint8_t data_in)
     digitalWrite(ADS1220_CS_PIN, HIGH);
 }
 
+// Writes to a single register
 void ads1262_Reg_Write(uint8_t READ_WRITE_ADDRESS, uint8_t DATA)
 {
     uint8_t dataToSend[2];

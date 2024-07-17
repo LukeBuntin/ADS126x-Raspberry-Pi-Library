@@ -1,5 +1,5 @@
 # ADS126x-Raspberry-Pi-Library
-(Unfinished) Library for communicating with the ADS1262 and ADS1263 using a Raspberry Pi
+(Unfinished/not confirmed) Library for communicating with the ADS1262 and ADS1263 using a Raspberry Pi
 
 # Connections from Raspberry Pi to ADS1262 ADC Chip
 
@@ -54,3 +54,11 @@ To manually compile the code using `gcc`, follow these steps:
    gcc -o ads1262_example ads1262_communication.c ads1262_library.c -lwiringPi -lwiringPiDev
    sudo ./ads1262_example
 
+
+## Debugging
+
+- Utilize a logic analyzer to manually confirm SPI Commands are being transferred and received
+- Complete continuity and voltage tests
+- perform self-test on ADC (reger to datasheet)
+- verify connections
+- read back registers (will implement command to do so)
