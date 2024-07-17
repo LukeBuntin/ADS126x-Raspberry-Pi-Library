@@ -16,11 +16,11 @@ int spi_fd;
 void ads1262_Init(void)
 {
     wiringPiSetup();
-    // pinMode(GPIO_DRDY, INPUT);
+    pinMode(GPIO_DRDY, INPUT);
     pinMode(GPIO_DOUT_DRDY, INPUT);
-    // pinMode(GPIO_RESET, OUTPUT);
-    // pinMode(GPIO_START, OUTPUT);
-    // pinMode(ADS1220_CS_PIN, OUTPUT);
+    pinMode(GPIO_RESET, OUTPUT);
+    pinMode(GPIO_START, OUTPUT);
+    pinMode(ADS1220_CS_PIN, OUTPUT);
 
     spi_fd = open(SPI_DEVICE, O_RDWR);
     if (spi_fd < 0) {

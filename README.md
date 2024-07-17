@@ -1,5 +1,5 @@
 # ADS126x-Raspberry-Pi-Library
-Library for communicating with the ADS1262 and ADS1263 using a Raspberry Pi
+(Unfinished) Library for communicating with the ADS1262 and ADS1263 using a Raspberry Pi
 
 # Connections from Raspberry Pi to ADS1262 ADC Chip
 

@@ -15,10 +15,11 @@
 
 // Pin declaration (WiringPi pin numbers)
 // https://github.com/WiringPi/WiringPi
-// #define GPIO_DRDY 5   // GPIO 24
-// #define GPIO_RESET 4  // GPIO 23
-// #define GPIO_START 6  // GPIO 25
-// #define ADS1220_CS_PIN 3   // GPIO 22
+// Temporary pin assignments for all but GPIO_DOUT_DRDY
+#define GPIO_DRDY 5   // GPIO 24
+#define GPIO_RESET 4  // GPIO 23
+#define GPIO_START 6  // GPIO 25
+#define ADS1220_CS_PIN 3   // GPIO 22
 #define GPIO_DOUT_DRDY 13 // GPIO 9
 
 // Register addresses
