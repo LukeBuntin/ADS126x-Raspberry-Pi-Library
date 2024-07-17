@@ -6,6 +6,7 @@
 #include <unistd.h> // for usleep
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #define SPI_DEVICE "/dev/spidev0.0"
 #define SPI_MODE SPI_MODE_1
@@ -156,7 +157,11 @@ void ads1262_SPI_Command_Data(uint8_t data_in)
         .bits_per_word = 8,
     };
 
-    ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi);
+    if (ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
+        perror("Failed to send SPI command");
+        digitalWrite(ADS1220_CS_PIN, HIGH);
+        return;  // Indicate failure to send command
+    }
 
     usleep(2000);
     digitalWrite(ADS1220_CS_PIN, HIGH);
@@ -164,27 +169,30 @@ void ads1262_SPI_Command_Data(uint8_t data_in)
 
 void ads1262_Reg_Write(uint8_t READ_WRITE_ADDRESS, uint8_t DATA)
 {
-    uint8_t dataToSend[3];
+    uint8_t dataToSend[2];
     dataToSend[0] = READ_WRITE_ADDRESS | WREG;
-    dataToSend[1] = 0x00;  // number of registers to write - 1
-    dataToSend[2] = DATA;
+    dataToSend[1] = DATA;
 
     digitalWrite(ADS1220_CS_PIN, LOW);
     usleep(2000);
 
     struct spi_ioc_transfer spi = {
         .tx_buf = (unsigned long)dataToSend,
-        .rx_buf = (unsigned long)dataToSend,
-        .len = 3,
+        .rx_buf = 0,
+        .len = 2,
         .speed_hz = SPI_SPEED,
         .bits_per_word = 8,
     };
 
-    ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi);
+    if (ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
+        perror("Failed to write to SPI device");
+        exit(EXIT_FAILURE);
+    }
 
     usleep(2000);
     digitalWrite(ADS1220_CS_PIN, HIGH);
 }
+
 
 char* ads1262_Read_Data(void)
 {
@@ -200,7 +208,11 @@ char* ads1262_Read_Data(void)
         .bits_per_word = 8,
     };
 
-    ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi);
+    if (ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
+        perror("Failed to read from SPI device");
+        digitalWrite(ADS1220_CS_PIN, HIGH);
+        return NULL;  // Indicate failure to read data
+    }
 
     digitalWrite(ADS1220_CS_PIN, HIGH);
 
