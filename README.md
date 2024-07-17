@@ -16,7 +16,7 @@
 | 11                     | SCLK (GPIO 11)        | SCLK                | SPI Clock              |
 | GND                    | Ground                | DGND                | Digital Ground         |
 | 3.3V                   | 3.3V                  | DVDD                | Digital Power Supply   |
-| 3.3V                   | 3.3V                  | AVDD                | Analog Power Supply    |
+| 5V                     | 5V                    | AVDD                | Analog Power Supply    |
 | GND                    | Ground                | AVSS                | Analog Ground          |
 
 ## Description
