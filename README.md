@@ -59,6 +59,6 @@ To manually compile the code using `gcc`, follow these steps:
 
 - Utilize a logic analyzer to manually confirm SPI Commands are being transferred and received
 - Complete continuity and voltage tests
-- perform self-test on ADC (reger to datasheet)
+- perform self-test on ADC (refer to datasheet)
 - verify connections
 - read back registers (will implement command to do so)
