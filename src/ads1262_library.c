@@ -40,8 +40,8 @@ void ads1262_Init(void)
         exit(EXIT_FAILURE);
     }
 
-    usleep(350000); // Delay to power internal voltage reference
-  
+    usleep(100000); // Delay to wait for clock cycle reset hold to end
+
     ads1262_Reg_Write(POWER, 0x11);        // Default (Will need to change to external voltage for higher input analog voltage)
     usleep(10000);
     ads1262_Reg_Write(INTERFACE, 0x05);    // Default
@@ -53,45 +53,45 @@ void ads1262_Init(void)
     ads1262_Reg_Write(MODE2, 0x04);        // 20 sps (max in fir mode)
     usleep(10000);
     ads1262_Reg_Write(INPMUX, 0x0F);       // Positive AIN0 and Negative Float (Connect to the universal ground)
-    usleep(10000);  
+    usleep(10000);
     ads1262_Reg_Write(OFCAL0, 0x00);       // Default
-    usleep(10000);  
+    usleep(10000);
     ads1262_Reg_Write(OFCAL1, 0x00);       // Default
-    usleep(10000);  
+    usleep(10000);
     ads1262_Reg_Write(OFCAL2, 0x00);       // Default
-    usleep(10000);  
+    usleep(10000);
     ads1262_Reg_Write(FSCAL0, 0x00);       // Default
-    usleep(10000);  
+    usleep(10000);
     ads1262_Reg_Write(FSCAL1, 0x00);       // Default
-    usleep(10000);  
+    usleep(10000);
     ads1262_Reg_Write(FSCAL2, 0x40);       // Default
-    usleep(10000);  
+    usleep(10000);
     ads1262_Reg_Write(IDACMUX, 0xBB);      // Default
-    usleep(10000);  
+    usleep(10000);
     ads1262_Reg_Write(IDACMAG, 0x00);      // Default
-    usleep(10000);  
+    usleep(10000);
     ads1262_Reg_Write(REFMUX, 0x02);       // Negative side connected to AIN3 (Connect to ground)
-    usleep(10000);    
+    usleep(10000);
     ads1262_Reg_Write(TDACP, 0x00);        // Default
-    usleep(10000);    
+    usleep(10000);
     ads1262_Reg_Write(TDACN, 0x00);        // Default
-    usleep(10000);    
+    usleep(10000);
     ads1262_Reg_Write(GPIOCON, 0x00);      // Default
-    usleep(10000);    
+    usleep(10000);
     ads1262_Reg_Write(GPIODIR, 0x00);      // Default
-    usleep(10000);    
+    usleep(10000);
     ads1262_Reg_Write(GPIODAT, 0x00);      // Default
-    usleep(10000);    
+    usleep(10000);
     ads1262_Reg_Write(ADC2CFG, 0x00);      // Default
-    usleep(10000);    
+    usleep(10000);
     ads1262_Reg_Write(ADC2MUX, 0x01);      // Default
-    usleep(10000);    
+    usleep(10000);
     ads1262_Reg_Write(ADC2OFC0, 0x00);     // Default
-    usleep(10000);    
+    usleep(10000);
     ads1262_Reg_Write(ADC2OFC1, 0x00);     // Default
-    usleep(10000);    
+    usleep(10000);
     ads1262_Reg_Write(ADC2FSC0, 0x00);     // Default
-    usleep(10000);    
+    usleep(10000);
     ads1262_Reg_Write(ADC2FSC1, 0x40);     // Default
     usleep(10000);
 }
@@ -170,9 +170,10 @@ void ads1262_SPI_Command_Data(uint8_t data_in)
 // Writes to a single register
 void ads1262_Reg_Write(uint8_t READ_WRITE_ADDRESS, uint8_t DATA)
 {
-    uint8_t dataToSend[2];
+    uint8_t dataToSend[3];
     dataToSend[0] = READ_WRITE_ADDRESS | WREG;
-    dataToSend[1] = DATA;
+    dataToSend[1] = 0x00; // Write to one register
+    dataToSend[2] = DATA;
 
     digitalWrite(ADS1220_CS_PIN, LOW);
     usleep(2000);
@@ -180,7 +181,7 @@ void ads1262_Reg_Write(uint8_t READ_WRITE_ADDRESS, uint8_t DATA)
     struct spi_ioc_transfer spi = {
         .tx_buf = (unsigned long)dataToSend,
         .rx_buf = 0,
-        .len = 2,
+        .len = 3,
         .speed_hz = SPI_SPEED,
         .bits_per_word = 8,
     };
@@ -194,17 +195,22 @@ void ads1262_Reg_Write(uint8_t READ_WRITE_ADDRESS, uint8_t DATA)
     digitalWrite(ADS1220_CS_PIN, HIGH);
 }
 
-
-char* ads1262_Read_Data(void)
+// Reads a single register
+uint8_t ads1262_Reg_Read(uint8_t READ_WRITE_ADDRESS)
 {
-    static char SPI_Dummy_Buff[6];
+    uint8_t dataToSend[2];
+    uint8_t dataReceived[2];
+
+    dataToSend[0] = READ_WRITE_ADDRESS | RREG;
+    dataToSend[1] = 0x00; // Write to one register
 
     digitalWrite(ADS1220_CS_PIN, LOW);
+    usleep(2000);
 
     struct spi_ioc_transfer spi = {
-        .tx_buf = (unsigned long)SPI_Dummy_Buff,
-        .rx_buf = (unsigned long)SPI_Dummy_Buff,
-        .len = 6,
+        .tx_buf = (unsigned long)dataToSend,
+        .rx_buf = (unsigned long)dataReceived,
+        .len = 2,
         .speed_hz = SPI_SPEED,
         .bits_per_word = 8,
     };
@@ -212,10 +218,41 @@ char* ads1262_Read_Data(void)
     if (ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
         perror("Failed to read from SPI device");
         digitalWrite(ADS1220_CS_PIN, HIGH);
-        return NULL;  // Indicate failure to read data
+        return 0;  // Indicate failure to read data
     }
 
+    usleep(2000);
     digitalWrite(ADS1220_CS_PIN, HIGH);
+
+    return dataReceived[1];  // The second byte is the register value
+}
+
+char* ads1262_Read_Data(void)
+{
+    static char SPI_Dummy_Buff[6];
+    uint8_t status;
+
+    do {
+        digitalWrite(ADS1220_CS_PIN, LOW);
+
+        struct spi_ioc_transfer spi = {
+            .tx_buf = (unsigned long)SPI_Dummy_Buff,
+            .rx_buf = (unsigned long)SPI_Dummy_Buff,
+            .len = 6,
+            .speed_hz = SPI_SPEED,
+            .bits_per_word = 8,
+        };
+
+        if (ioctl(spi_fd, SPI_IOC_MESSAGE(1), &spi) < 0) {
+            perror("Failed to read from SPI device");
+            digitalWrite(ADS1220_CS_PIN, HIGH);
+            return NULL;  // Indicate failure to read data
+        }
+
+        digitalWrite(ADS1220_CS_PIN, HIGH);
+
+        status = SPI_Dummy_Buff[0]; // Assuming the status byte is the first byte
+    } while ((status & 0x80) == 0); // Check if the ADC1 status bit (7th bit) is 1
 
     return SPI_Dummy_Buff;
 }

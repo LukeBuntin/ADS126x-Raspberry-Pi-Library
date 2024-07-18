@@ -8,7 +8,7 @@
 | Raspberry Pi Pin (BCM) | Raspberry Pi Pin Name | ADS1262 Pin Name    | Function               |
 |------------------------|-----------------------|---------------------|------------------------|
 | GND                    | Ground                | CS                  | Chip Select            |
-| FLOAT                  | N/A                   | RESET               | Reset                  |
+| 3.3V                   |  3.3V                 | RESET               | Reset                  |
 | FLOAT                  | N/A                   | DRDY                | Data Ready             |
 | FLOAT                  | N/A                   | START               | Start Conversion       |
 | 10                     | MOSI (GPIO 10)        | DIN                 | SPI Data In            |
@@ -22,7 +22,7 @@
 ## Description
 
 1. **Chip Select (CS)**: This pin is connected to GPIO 22 on the Raspberry Pi. It is used to select the ADS1262 chip for SPI communication (Switch to a GPIO Pin if you are using multiple chips).
-2. **Reset (RESET)**: This pin is connected to float. It is unused.
+2. **Reset (RESET)**: This pin is connected to 3.3V. It is fixed to high in our configuration.
 3. **Data Ready (DRDY)**: This pin is connected to float. We are using DOUT/DRDY.
 4. **Start Conversion (START)**: This pin is connected to float. We are using the SPI command.
 5. **SPI Data In (DIN)**: This pin is connected to the MOSI pin (GPIO 10) on the Raspberry Pi. It is used for sending data to the ADS1262.
@@ -61,4 +61,4 @@ To manually compile the code using `gcc`, follow these steps:
 - Complete continuity and voltage tests
 - perform self-test on ADC (refer to datasheet)
 - verify connections
-- read back registers (will implement command to do so)
+- read back registers

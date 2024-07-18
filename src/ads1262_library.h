@@ -17,10 +17,10 @@
 // https://github.com/WiringPi/WiringPi
 // Temporary pin assignments for all but GPIO_DOUT_DRDY
 #define GPIO_DRDY 5   // GPIO 24
-#define GPIO_RESET 4  // GPIO 23
+#define GPIO_RESET 4  // GPIO 23 (Since we are only using SPI we can connect our RESET to 3.3V and leave this as a float)
 #define GPIO_START 6  // GPIO 25
 #define ADS1220_CS_PIN 3   // GPIO 22
-#define GPIO_DOUT_DRDY 13 // GPIO 9
+#define GPIO_DOUT_DRDY 13 // GPIO 9 
 
 // Register addresses
 #define POWER    0x01
@@ -53,6 +53,7 @@
 void ads1262_Init(void);
 void ads1262_Reset(void);
 void ads1262_Reg_Write(uint8_t READ_WRITE_ADDRESS, uint8_t DATA);
+void ads1262_Reg_Read(uint8_t READ_WRITE_ADDRESS, uint8_t *DATA, uint8_t BYTES);
 void ads1262_SPI_Command_Data(uint8_t data_in);
 void ads1262_Disable_Start(void);
 void ads1262_Enable_Start(void);
